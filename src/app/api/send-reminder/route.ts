@@ -6,7 +6,8 @@ import { isFirstOrLastTuesday } from '../../../utils/date';
 import { sql } from '@vercel/postgres';
 
 // Initialize Resend with the API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with the API key safely
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function GET(request: NextRequest) {
     try {
@@ -24,13 +25,17 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'Skipped: Not scheduled time' });
         }
 
+        if (!resend) {
+            console.warn('RESEND_API_KEY missing, skipping email send');
+            return NextResponse.json({ message: 'Skipped: No API Key' });
+        }
+
         // 1. Get Emma's data
         const emma = employees.find(e => e.email === 'emma@m51.no');
         if (!emma) {
             throw new Error('Emma not found in database');
         }
 
-        // 2. Get her stats from JSON file
         // 2. Get her stats from Database
         const { rows: contributions } = await sql`SELECT * FROM contributions`;
         // Mapping from snake_case DB columns to camelCase expected by logic if needed, 

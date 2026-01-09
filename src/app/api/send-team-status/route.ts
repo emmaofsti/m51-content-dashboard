@@ -3,8 +3,8 @@ import { Resend } from 'resend';
 import { employees } from '../../../data/employees';
 import { sql } from '@vercel/postgres';
 
-// Initialize Resend with the API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with the API key safely
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 function isFirstTuesdayOfMonth(date: Date): boolean {
     const day = date.getDay();
@@ -28,6 +28,11 @@ export async function GET(request: NextRequest) {
 
         if (!force && !isScheduledTime) {
             return NextResponse.json({ message: 'Skipped: Not the first Tuesday of the month' });
+        }
+
+        if (!resend) {
+            console.warn('RESEND_API_KEY missing, skipping team email');
+            return NextResponse.json({ message: 'Skipped: No API Key' });
         }
 
         // 1. Get stats from Database

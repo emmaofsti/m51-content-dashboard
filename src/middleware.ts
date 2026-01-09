@@ -12,7 +12,8 @@ export function middleware(request: NextRequest) {
         path.startsWith('/static') ||   // Static assets
         path.includes('.') ||           // Files with extensions (images, favicon, etc)
         path.startsWith('/api/send-reminder') ||     // Allow Cron Jobs
-        path.startsWith('/api/send-team-status');    // Allow Cron Jobs
+        path.startsWith('/api/send-team-status') ||  // Allow Cron Jobs
+        path === '/api/setup-db';                    // Allow DB Setup
 
     if (isPublicPath) {
         return NextResponse.next();

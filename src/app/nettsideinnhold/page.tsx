@@ -12,8 +12,9 @@ import { ContributionList } from '../../components/ContributionList';
 import { TeamProgress } from '../../components/TeamProgress';
 import styles from './page.module.css';
 
-export default function Home() {
-  // Get month from URL or default to Jan 2026
+import { Suspense } from 'react';
+
+function DashboardContent() {
   const searchParams = useSearchParams();
   const selectedMonth = searchParams.get('month') || '2026-01';
 
@@ -103,7 +104,7 @@ export default function Home() {
   };
 
   return (
-    <main className={styles.main}>
+    <>
       <h1 className={styles.title}>Nettsideinnhold – Oversikt</h1>
       <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)', marginBottom: '3rem' }} />
       <TeamProgress currentMonth={selectedMonth} />
@@ -163,6 +164,16 @@ export default function Home() {
           </div>
         )}
       </Modal>
+    </>
+  );
+}
+
+export default function Home() {
+  return (
+    <main className={styles.main}>
+      <Suspense fallback={<div>Laster...</div>}>
+        <DashboardContent />
+      </Suspense>
     </main>
   );
 }

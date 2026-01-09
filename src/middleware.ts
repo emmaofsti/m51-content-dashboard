@@ -4,6 +4,11 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
 
+    // EMERGENCY BYPASS: Always allow setup routes
+    if (path.includes('setup') || path.includes('setup-db')) {
+        return NextResponse.next();
+    }
+
     // 1. Define public paths that don't need auth
     const isPublicPath =
         path === '/login' ||
@@ -14,7 +19,7 @@ export function middleware(request: NextRequest) {
         path.startsWith('/api/send-reminder') ||     // Allow Cron Jobs
         path.startsWith('/api/send-team-status') ||  // Allow Cron Jobs
         path.startsWith('/api/setup-db') ||          // Allow DB Setup API
-        path === '/setup';                           // Allow DB Setup Page
+        path.startsWith('/setup');                   // Allow DB Setup Page
 
     if (isPublicPath) {
         return NextResponse.next();

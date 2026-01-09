@@ -25,7 +25,7 @@ export default function SetupPage() {
 
     return (
         <div style={{ padding: '2rem', color: 'white', textAlign: 'center' }}>
-            <h1>Database Setup</h1>
+            <h1>Database Setup v2</h1>
             <p>Click the button below to create the necessary tables.</p>
             <button
                 onClick={handleSetup}

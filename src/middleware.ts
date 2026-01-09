@@ -13,7 +13,8 @@ export function middleware(request: NextRequest) {
         path.includes('.') ||           // Files with extensions (images, favicon, etc)
         path.startsWith('/api/send-reminder') ||     // Allow Cron Jobs
         path.startsWith('/api/send-team-status') ||  // Allow Cron Jobs
-        path === '/api/setup-db';                    // Allow DB Setup
+        path.startsWith('/api/setup-db') ||          // Allow DB Setup API
+        path === '/setup';                           // Allow DB Setup Page
 
     if (isPublicPath) {
         return NextResponse.next();

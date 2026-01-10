@@ -214,14 +214,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             message: 'Team email sent successfully',
-            data,
-            debug: {
-                sortedStats: employeeStats.slice(0, 5),
-                top3: top3,
-                first: first,
-                second: second,
-                third: third
-            }
+            data
         });
 
     } catch (error) {

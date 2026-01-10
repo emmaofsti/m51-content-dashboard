@@ -103,6 +103,12 @@ export async function GET(request: NextRequest) {
 
         let topContentHtml = '';
 
+        // Hoist variables for debug scope
+        let top3: { name: string; count: number; }[] = [];
+        let first = { name: '-', count: 0 };
+        let second = { name: '-', count: 0 };
+        let third = { name: '-', count: 0 };
+
         if (winners.length > 1) {
             // Tie Logic: Show text instead of podium
             const names = winners.map(w => w.name).join(', ');
@@ -120,11 +126,11 @@ export async function GET(request: NextRequest) {
             `;
         } else {
             // Standard Podium Logic
-            const top3 = employeeStats.filter(e => e.count > 0).slice(0, 3);
+            top3 = employeeStats.filter(e => e.count > 0).slice(0, 3);
 
-            const first = top3[0] || { name: '-', count: 0 };
-            const second = top3[1] || { name: '-', count: 0 };
-            const third = top3[2] || { name: '-', count: 0 };
+            first = top3[0] || { name: '-', count: 0 };
+            second = top3[1] || { name: '-', count: 0 };
+            third = top3[2] || { name: '-', count: 0 };
 
             topContentHtml = top3.length > 0 ? `
             <table width="100%" cellspacing="0" cellpadding="0" style="margin: 20px 0; max-width: 400px; margin-left: auto; margin-right: auto; text-align: center;">

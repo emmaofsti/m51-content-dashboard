@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         // "Good": "Du har skrevet - bidrag i år... streak på 0 (mistake in user prompt? 'du vil vel ikke miste den')".
         // Let's assume Good = yearlyCount > 0.
 
-        const subject = 'Kanskje tid for å skrive noe til nettsiden?';
+        const subject = 'Kanskje tid for å skrive noe til nettsiden? 😝';
 
         let htmlContent = '';
 
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
             data,
             debug: {
                 to: targetEmail,
-                subject: `Din status for ${capitalizedMonth} 📊`,
+                subject: subject,
                 monthName: monthName
             }
         });

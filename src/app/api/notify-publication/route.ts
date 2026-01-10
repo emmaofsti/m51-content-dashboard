@@ -20,10 +20,19 @@ export async function POST(request: Request) {
             subject,
             `
             <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #ff3b3f;">Nytt innhold er registrert!</h2>
-              <p>Tittel: <strong>${title}</strong></p>
+              <h2 style="color: #ff3b3f;">Hei Jonathan</h2>
+              <p>Oioi, jobben kaller 📢</p>
+              <p>Noen har nettopp publisert nytt innhold på nettsiden:</p>
+              
+              <blockquote style="border-left: 4px solid #ff3b3f; padding-left: 10px; margin: 20px 0; font-style: italic; font-size: 18px;">
+                ${title}
+              </blockquote>
+              
+              <p>Ta en titt, og få det ut på Instagram!</p>
+              <p>Du er flink! 🌟</p>
+              
               <br/>
-              <p>– M51 Content Dashboard</p>
+              <p style="color: #999; font-size: 12px;">– Content Tracker</p>
             </div>
           `
         );

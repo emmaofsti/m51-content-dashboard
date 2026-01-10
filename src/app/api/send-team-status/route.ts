@@ -94,10 +94,53 @@ export async function GET(request: NextRequest) {
         // Sort desc
         employeeStats.sort((a, b) => b.count - a.count);
 
-        // Take top 3 (only if count > 0)
+        // Take top 3
         const top3 = employeeStats.filter(e => e.count > 0).slice(0, 3);
 
-        const top3List = top3.map((e, i) => `<li>${i + 1}. ${e.name} (${e.count} bidrag) 🏆</li>`).join('');
+        // Prepare podium data (Needs at least 1 person to show podium, but let's handle empty gracefully)
+        // Positions for podium: Left (2nd), Center (1st), Right (3rd)
+        const first = top3[0] || { name: '-', count: 0 };
+        const second = top3[1] || { name: '-', count: 0 };
+        const third = top3[2] || { name: '-', count: 0 };
+
+        // HTML for podium (using a table for email compatibility)
+        // Structure:
+        // |   2   |   1   |   3   |
+        // | Name  | Name  | Name  |
+        // | bar   | bar   | bar   |
+
+        const podiumHtml = top3.length > 0 ? `
+        <table width="100%" cellspacing="0" cellpadding="0" style="margin: 20px 0; max-width: 400px; margin-left: auto; margin-right: auto; text-align: center;">
+            <tr>
+                <!-- 2nd Place -->
+                <td valign="bottom" width="33%" style="padding: 0 5px;">
+                    <div style="font-size: 1.5rem;">🥈</div>
+                    <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${second.count > 0 ? second.name : ''}</div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${second.count > 0 ? second.count + ' bidrag' : ''}</div>
+                    <div style="height: 30px;"></div>
+                    <div style="background-color: #e0e0e0; height: 60px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
+                </td>
+
+                <!-- 1st Place -->
+                <td valign="bottom" width="33%" style="padding: 0 5px;">
+                    <div style="font-size: 2rem;">🏆</div>
+                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${first.count > 0 ? first.name : ''}</div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${first.count > 0 ? first.count + ' bidrag' : ''}</div>
+                    <div style="height: 20px;"></div>
+                    <div style="background-color: #ff3b3f; height: 100px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
+                </td>
+
+                <!-- 3rd Place -->
+                <td valign="bottom" width="33%" style="padding: 0 5px;">
+                    <div style="font-size: 1.5rem;">🥉</div>
+                    <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${third.count > 0 ? third.name : ''}</div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${third.count > 0 ? third.count + ' bidrag' : ''}</div>
+                    <div style="height: 40px;"></div>
+                    <div style="background-color: #e0e0e0; height: 40px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
+                </td>
+            </tr>
+        </table>
+        ` : '<p style="text-align: center; color: #999;">Ingen bidrag enda i år.</p>';
 
 
         // 2. Construct Email
@@ -110,18 +153,17 @@ export async function GET(request: NextRequest) {
             html: `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #ff3b3f;">Hei fine deg! 👋</h2>
-          
+
           <p>Her kommer en oppdatering på nettsideinnhold hittil.</p>
-          
+
           <h3 style="margin-bottom: 5px;">Status – året så langt:</h3>
           <ul style="padding-left: 20px;">
             <li>Publisert: <strong>${ytdPublished}</strong></li>
           </ul>
 
-          <h4 style="margin-bottom: 5px;">Topp 3 bidragsytere:</h4>
-          <ul style="padding-left: 20px; list-style: none;">
-            ${top3List || '<li>Ingen enda... bli den første!</li>'}
-          </ul>
+          <h4 style="margin-bottom: 5px; text-align: center;">Topp 3 bidragsytere 🏆</h4>
+
+          ${podiumHtml}
 
           <h3 style="margin-bottom: 5px;">Denne måneden (${monthName}):</h3>
           <ul style="padding-left: 20px;">

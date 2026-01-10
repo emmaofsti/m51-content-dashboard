@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { usePathname } from "next/navigation";
 import styles from "./Shell.module.css";
@@ -8,6 +8,24 @@ import styles from "./Shell.module.css";
 export function Shell({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
+
+    // Initialize based on screen size (client-side only)
+    useEffect(() => {
+        const checkScreen = () => {
+            if (window.innerWidth > 1024) {
+                setIsOpen(true);
+            } else {
+                setIsOpen(false);
+            }
+        };
+
+        // Check on mount
+        checkScreen();
+
+        // Optional: Listen for resize if we want dynamic adaptation
+        // window.addEventListener('resize', checkScreen);
+        // return () => window.removeEventListener('resize', checkScreen);
+    }, []);
 
     // Bypass shell layout for login page
     if (pathname?.startsWith('/login')) {
@@ -26,7 +44,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </button>
 
             {/* Sidebar */}
-            <div className={`${styles.sidebarContainer} ${isOpen ? styles.open : ''}`}>
+            <div className={`${styles.sidebarContainer} ${isOpen ? styles.open : styles.closed}`}>
                 <Sidebar />
             </div>
 
@@ -39,7 +57,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             )}
 
             {/* Main Content */}
-            <main className={styles.mainContent}>
+            <main className={`${styles.mainContent} ${!isOpen ? styles.closed : ''}`}>
                 {children}
             </main>
         </div>

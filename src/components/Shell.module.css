@@ -15,7 +15,12 @@
     left: 0;
     top: 0;
     z-index: 100;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, left 0.3s ease;
+    transform: translateX(0);
+}
+
+.sidebarContainer.closed {
+    transform: translateX(-100%);
 }
 
 /* Main Content */
@@ -26,12 +31,17 @@
     padding: 2rem;
     transition: margin-left 0.3s ease;
     width: 100%;
+    padding-top: 5rem;
+    /* Always space for toggle */
 }
 
-/* Toggle Button (Mobile Only) */
+.mainContent.closed {
+    margin-left: 0;
+}
+
+/* Toggle Button (Visible Always) */
 .toggleButton {
-    display: none;
-    /* Hidden on desktop */
+    display: flex;
     position: fixed;
     top: 1rem;
     left: 1rem;
@@ -59,33 +69,21 @@
     }
 
     .mainContent {
-        margin-left: 0;
-        /* Full width on mobile */
+        margin-left: 0 !important;
+        /* Always full width on mobile */
         padding-top: 5rem;
-        /* Space for toggle button */
     }
 
     .sidebarContainer {
         transform: translateX(-100%);
-        /* Hidden by default */
+        /* Default hidden on mobile unless open */
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
     }
 
+    /* On mobile, 'open' class shows it. 'closed' is default state basically */
     .sidebarContainer.open {
         transform: translateX(0);
-        /* Slide in */
     }
 
-    .toggleButton {
-        display: flex;
-    }
-
-    .overlay {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 90;
-        backdrop-filter: blur(2px);
-    }
+    /* Override the generic .closed rule if needed, but the logic above handles it */
 }

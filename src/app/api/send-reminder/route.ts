@@ -2,10 +2,9 @@ import { NextResponse, NextRequest } from 'next/server';
 import { Resend } from 'resend';
 import { employees } from '../../../data/employees';
 import { calculateStreak } from '../../../utils/stats';
-import { isFirstOrLastTuesday } from '../../../utils/date';
+import { isLastTuesdayOfMonth } from '../../../utils/date';
 import { sql } from '@vercel/postgres';
 
-// Initialize Resend with the API key
 // Initialize Resend with the API key safely
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -16,12 +15,11 @@ export async function GET(request: NextRequest) {
 
         // Date Logic
         const now = new Date();
-        const isNinth = now.getDate() === 9;
-        const isScheduledTuesday = isFirstOrLastTuesday(now);
+        const isScheduledTuesday = isLastTuesdayOfMonth(now);
 
-        // Allow if forced, or if it's the 9th, or if it's a scheduled Tuesday
+        // Allow if forced, or if it's a scheduled Tuesday
         // Also check if we are in testing mode (force=true bypasses this)
-        if (!force && !isNinth && !isScheduledTuesday) {
+        if (!force && !isScheduledTuesday) {
             return NextResponse.json({ message: 'Skipped: Not scheduled time' });
         }
 

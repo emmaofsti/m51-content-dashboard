@@ -7,6 +7,7 @@ interface ContributionsContextType {
     contributions: Contribution[];
     addContribution: (contribution: Omit<Contribution, 'id'>) => Promise<void>;
     deleteContribution: (id: string) => Promise<void>;
+    refreshContributions: () => Promise<void>;
     isLoading: boolean;
 }
 
@@ -16,18 +17,28 @@ export function ContributionsProvider({ children }: { children: ReactNode }) {
     const [contributions, setContributions] = useState<Contribution[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const fetchContributions = async () => {
+        try {
+            const res = await fetch('/api/contributions', { cache: 'no-store' });
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setContributions(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch contributions", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // Load from API on mount
     useEffect(() => {
-        fetch('/api/contributions')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setContributions(data);
-                }
-            })
-            .catch(err => console.error("Failed to fetch contributions", err))
-            .finally(() => setIsLoading(false));
+        fetchContributions();
     }, []);
+
+    const refreshContributions = async () => {
+        await fetchContributions();
+    };
 
     const addContribution = async (newContribution: Omit<Contribution, 'id'>) => {
         // Optimistic update
@@ -83,7 +94,7 @@ export function ContributionsProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <ContributionsContext.Provider value={{ contributions, addContribution, deleteContribution, isLoading }}>
+        <ContributionsContext.Provider value={{ contributions, addContribution, deleteContribution, refreshContributions, isLoading }}>
             {children}
         </ContributionsContext.Provider>
     );

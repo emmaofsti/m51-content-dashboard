@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useContributions } from '../../context/ContributionsContext';
 import { employees } from '../../data/employees';
@@ -18,9 +18,14 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const selectedMonth = searchParams.get('month') || '2026-01';
 
-  const { contributions, addContribution } = useContributions();
+  const { contributions, addContribution, refreshContributions } = useContributions();
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Refresh data when visiting this page
+  useEffect(() => {
+    refreshContributions();
+  }, []);
 
   // Derive employee stats from contributions based on selected month
   const employeesWithStats = useMemo(() => {

@@ -19,6 +19,9 @@ const nunito = Nunito_Sans({
 export const metadata: Metadata = {
   title: "M51 Content Dashboard",
   description: "Internal content tracking",
+  verification: {
+    google: "l_3k6VrlpbPoPEQ8j4KGR2Wkk7B_Il_nKGjbMZfCzPs",
+  },
 };
 
 export const viewport = {

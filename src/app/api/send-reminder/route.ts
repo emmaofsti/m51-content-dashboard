@@ -58,6 +58,9 @@ export async function GET(request: NextRequest) {
 
         const streak = calculateStreak(employeeContributions);
 
+        const monthName = now.toLocaleString('nb-NO', { month: 'long' });
+        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
         // 3. Construct Email Content
         const hasContributions = yearlyCount > 0 || streak > 0; // Define "Good" vs "Bad" logic. User implied "dårlig" = "ikke gjort noe" (0 bidrag i år?). usage of "bra" = "skrevet - bidrag".
         // Actually, user text for "Bad": "Du har skrevet 0 bidrag i år... streak på 0".

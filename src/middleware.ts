@@ -19,6 +19,7 @@ export function middleware(request: NextRequest) {
         path.startsWith('/api/send-reminder') ||     // Allow Cron Jobs
         path.startsWith('/api/send-team-status') ||  // Allow Cron Jobs
         path.startsWith('/api/setup-db') ||          // Allow DB Setup API
+        path.startsWith('/api/debug-data') ||        // Allow Debug API
         path.startsWith('/setup');                   // Allow DB Setup Page
 
     if (isPublicPath) {

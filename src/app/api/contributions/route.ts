@@ -2,10 +2,24 @@ import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { Contribution } from '../../../data/contributions';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
     try {
         const { rows } = await sql`SELECT * FROM contributions ORDER BY date DESC`;
-        return NextResponse.json(rows);
+
+        const contributions = rows.map(row => ({
+            id: row.id,
+            employeeId: row.employee_id,
+            title: row.title,
+            type: row.type,
+            status: row.status,
+            date: row.date,
+            created_at: row.created_at
+        }));
+
+        return NextResponse.json(contributions);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to load contributions' }, { status: 500 });
     }

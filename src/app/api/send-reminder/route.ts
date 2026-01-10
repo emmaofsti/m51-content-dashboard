@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const force = searchParams.get('force') === 'true';
+        const targetEmail = searchParams.get('email') || 'emma@m51.no';
 
         // Date Logic
         const now = new Date();
@@ -28,13 +29,13 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'Skipped: No API Key' });
         }
 
-        // 1. Get Emma's data
-        const emma = employees.find(e => e.email === 'emma@m51.no');
-        if (!emma) {
-            throw new Error('Emma not found in database');
+        // 1. Get Employee data
+        const employee = employees.find(e => e.email === targetEmail);
+        if (!employee) {
+            return NextResponse.json({ error: `Employee not found: ${targetEmail}` }, { status: 404 });
         }
 
-        // 2. Get her stats from Database
+        // 2. Get stats from Database
         const { rows: contributions } = await sql`SELECT * FROM contributions`;
         // Mapping from snake_case DB columns to camelCase expected by logic if needed, 
         // OR adjust logic. DB columns: employee_id.
@@ -44,18 +45,18 @@ export async function GET(request: NextRequest) {
             employeeId: c.employee_id
         }));
 
-        const emmaContributions = mappedContributions.filter((c: any) => c.employeeId === emma.id);
+        const employeeContributions = mappedContributions.filter((c: any) => c.employeeId === employee.id);
 
         // Use 2026 as current year based on mock data
         const currentYear = 2026;
 
         // Calculate Yearly Contributions (Personal) using string matching for consistency
-        const yearlyCount = emmaContributions.filter((c: any) =>
+        const yearlyCount = employeeContributions.filter((c: any) =>
             c.status === 'Published' &&
             c.date.startsWith(currentYear.toString())
         ).length;
 
-        const streak = calculateStreak(emmaContributions);
+        const streak = calculateStreak(employeeContributions);
 
         // 3. Construct Email Content
         const streakMessage = streak > 0
@@ -67,11 +68,11 @@ export async function GET(request: NextRequest) {
 
         const { data, error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
-            to: 'emma@m51.no',
+            to: targetEmail,
             subject: `Din status for ${capitalizedMonth} 📊`,
             html: `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #ff3b3f;">Hei fine deg👋</h2>
+          <h2 style="color: #ff3b3f;">Hei ${employee.name}👋</h2>
           
           <p>Nå er det på tide å skrive et bidrag til nettsiden.</p>
           
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
             message: 'Email sent successfully',
             data,
             debug: {
-                to: 'emma@m51.no',
+                to: targetEmail,
                 subject: `Din status for ${capitalizedMonth} 📊`,
                 monthName: monthName
             }

@@ -95,57 +95,68 @@ export async function GET(request: NextRequest) {
             return { name: emp.name, count };
         });
 
-        // Sort desc
-        employeeStats.sort((a, b) => b.count - a.count);
+        // Check for ties in 1st place
+        const maxCount = employeeStats.length > 0 ? employeeStats[0].count : 0;
+        const winners = employeeStats.filter(e => e.count === maxCount && e.count > 0);
 
-        // Take top 3
-        const top3 = employeeStats.filter(e => e.count > 0).slice(0, 3);
+        let topContentHtml = '';
 
-        // Prepare podium data (Needs at least 1 person to show podium, but let's handle empty gracefully)
-        // Positions for podium: Left (2nd), Center (1st), Right (3rd)
-        const first = top3[0] || { name: '-', count: 0 };
-        const second = top3[1] || { name: '-', count: 0 };
-        const third = top3[2] || { name: '-', count: 0 };
+        if (winners.length > 1) {
+            // Tie Logic: Show text instead of podium
+            const names = winners.map(w => w.name).join(', ');
+            // "Veldig bra jobba til *navn* dere har publisert - innlegg hver"
+            // Rephrased slightly for grammar: "Veldig bra jobba til [Names], dere har publisert [Count] innlegg hver!"
+            const lastIndex = names.lastIndexOf(', ');
+            const formattedNames = lastIndex !== -1 ? names.substring(0, lastIndex) + ' og ' + names.substring(lastIndex + 2) : names;
 
-        // HTML for podium (using a table for email compatibility)
-        // Structure:
-        // |   2   |   1   |   3   |
-        // | Name  | Name  | Name  |
-        // | bar   | bar   | bar   |
+            topContentHtml = `
+            <div style="background: #BDED62; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; color: #171218;">
+                <h3 style="margin-top: 0;">🏆 Uavgjort i toppen!</h3>
+                <p style="font-size: 16px;">Veldig bra jobba til <strong>${formattedNames}</strong>!</p>
+                <p>Dere har publisert <strong>${maxCount}</strong> innlegg hver. 👏</p>
+            </div>
+            `;
+        } else {
+            // Standard Podium Logic
+            const top3 = employeeStats.filter(e => e.count > 0).slice(0, 3);
 
-        const podiumHtml = top3.length > 0 ? `
-        <table width="100%" cellspacing="0" cellpadding="0" style="margin: 20px 0; max-width: 400px; margin-left: auto; margin-right: auto; text-align: center;">
-            <tr>
-                <!-- 2nd Place -->
-                <td valign="bottom" width="33%" style="padding: 0 5px;">
-                    <div style="font-size: 1.5rem;">🥈</div>
-                    <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${second.count > 0 ? second.name : ''}</div>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${second.count > 0 ? second.count + ' bidrag' : ''}</div>
-                    <div style="height: 30px;"></div>
-                    <div style="background-color: #e0e0e0; height: 60px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
-                </td>
+            const first = top3[0] || { name: '-', count: 0 };
+            const second = top3[1] || { name: '-', count: 0 };
+            const third = top3[2] || { name: '-', count: 0 };
 
-                <!-- 1st Place -->
-                <td valign="bottom" width="33%" style="padding: 0 5px;">
-                    <div style="font-size: 2rem;">🏆</div>
-                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${first.count > 0 ? first.name : ''}</div>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${first.count > 0 ? first.count + ' bidrag' : ''}</div>
-                    <div style="height: 20px;"></div>
-                    <div style="background-color: #ff3b3f; height: 100px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
-                </td>
+            topContentHtml = top3.length > 0 ? `
+            <table width="100%" cellspacing="0" cellpadding="0" style="margin: 20px 0; max-width: 400px; margin-left: auto; margin-right: auto; text-align: center;">
+                <tr>
+                    <!-- 2nd Place -->
+                    <td valign="bottom" width="33%" style="padding: 0 5px;">
+                        <div style="font-size: 1.5rem;">🥈</div>
+                        <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${second.count > 0 ? second.name : ''}</div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${second.count > 0 ? second.count + ' bidrag' : ''}</div>
+                        <div style="height: 30px;"></div>
+                        <div style="background-color: #E0F7B6; height: 60px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
+                    </td>
 
-                <!-- 3rd Place -->
-                <td valign="bottom" width="33%" style="padding: 0 5px;">
-                    <div style="font-size: 1.5rem;">🥉</div>
-                    <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${third.count > 0 ? third.name : ''}</div>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${third.count > 0 ? third.count + ' bidrag' : ''}</div>
-                    <div style="height: 40px;"></div>
-                    <div style="background-color: #e0e0e0; height: 40px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
-                </td>
-            </tr>
-        </table>
-        ` : '<p style="text-align: center; color: #999;">Ingen bidrag enda i år.</p>';
+                    <!-- 1st Place -->
+                    <td valign="bottom" width="33%" style="padding: 0 5px;">
+                        <div style="font-size: 2rem;">🏆</div>
+                        <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${first.count > 0 ? first.name : ''}</div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${first.count > 0 ? first.count + ' bidrag' : ''}</div>
+                        <div style="height: 20px;"></div>
+                        <div style="background-color: #BDED62; height: 100px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
+                    </td>
 
+                    <!-- 3rd Place -->
+                    <td valign="bottom" width="33%" style="padding: 0 5px;">
+                        <div style="font-size: 1.5rem;">🥉</div>
+                        <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${third.count > 0 ? third.name : ''}</div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${third.count > 0 ? third.count + ' bidrag' : ''}</div>
+                        <div style="height: 40px;"></div>
+                        <div style="background-color: #F7FBEF; height: 40px; border-top-left-radius: 4px; border-top-right-radius: 4px;"></div>
+                    </td>
+                </tr>
+            </table>
+            ` : '<p style="text-align: center; color: #999;">Ingen bidrag enda i år.</p>';
+        }
 
         // 2. Construct Email
         const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
@@ -167,7 +178,7 @@ export async function GET(request: NextRequest) {
 
           <h4 style="margin-bottom: 5px; text-align: center;">Topp 3 bidragsytere 🏆</h4>
 
-          ${podiumHtml}
+          ${topContentHtml}
 
           <h3 style="margin-bottom: 5px;">Denne måneden (${monthName}):</h3>
           <ul style="padding-left: 20px;">

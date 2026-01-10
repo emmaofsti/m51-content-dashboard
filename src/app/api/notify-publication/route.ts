@@ -7,7 +7,7 @@ export async function POST(request: Request) {
         const { title } = body;
 
         const subject = title ? `Nytt bidrag: ${title} 🚀` : 'Nytt innhold publisert 🚀';
-        const targetEmail = 'jonathan@m51.no'; // Original target
+        const targetEmail = 'jonathan@m51.no, emma@m51.no'; // Update: Jonathan + Emma
 
         // Check for email credentials
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {

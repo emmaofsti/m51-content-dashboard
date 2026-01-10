@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { Resend } from 'resend';
 import { employees } from '../../../data/employees';
 import { calculateStreak } from '../../../utils/stats';
-import { isLastTuesdayOfMonth } from '../../../utils/date';
+import { isFirstTuesdayOfMonth } from '../../../utils/date';
 import { sql } from '@vercel/postgres';
 
 // Initialize Resend with the API key safely
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
         // Date Logic
         const now = new Date();
-        const isScheduledTuesday = isLastTuesdayOfMonth(now);
+        const isScheduledTuesday = isFirstTuesdayOfMonth(now);
 
         // Allow if forced, or if it's a scheduled Tuesday
         // Also check if we are in testing mode (force=true bypasses this)

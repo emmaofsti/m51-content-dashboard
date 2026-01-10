@@ -2,16 +2,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { Resend } from 'resend';
 import { employees } from '../../../data/employees';
 import { sql } from '@vercel/postgres';
+import { isLastTuesdayOfMonth } from '../../../utils/date';
 
 // Initialize Resend with the API key safely
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-
-function isFirstTuesdayOfMonth(date: Date): boolean {
-    const day = date.getDay();
-    const dayOfMonth = date.getDate();
-    // Tuesday is 2. First Tuesday means day of month is <= 7.
-    return day === 2 && dayOfMonth <= 7;
-}
 
 const MONTH_NAMES = [
     "januar", "februar", "mars", "april", "mai", "juni",
@@ -24,7 +18,7 @@ export async function GET(request: NextRequest) {
         const force = searchParams.get('force') === 'true';
 
         const now = new Date();
-        const isScheduledTime = isFirstTuesdayOfMonth(now);
+        const isScheduledTime = isLastTuesdayOfMonth(now);
 
         if (!force && !isScheduledTime) {
             return NextResponse.json({ message: 'Skipped: Not the first Tuesday of the month' });

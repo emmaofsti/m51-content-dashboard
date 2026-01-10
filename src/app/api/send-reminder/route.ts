@@ -62,10 +62,13 @@ export async function GET(request: NextRequest) {
             ? `<p>Du har en streak på <strong>${streak} måneder</strong>! 🔥 Du vil vel ikke miste den? 😉</p>`
             : `<p>Du har en streak på 0 måneder. Eller du har ikke gjort så mye, kanskje på tide? 🚀</p>`;
 
+        const monthName = now.toLocaleString('nb-NO', { month: 'long' });
+        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
         const { data, error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: 'emma@m51.no',
-            subject: 'Kanskje tid for å skirve noe til nettsiden?😝',
+            subject: `Din status for ${capitalizedMonth} 📊`,
             html: `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #ff3b3f;">Hei fine deg👋</h2>
@@ -77,7 +80,7 @@ export async function GET(request: NextRequest) {
             ${streakMessage}
           </div>
 
-          <p>Logg inn på <a href="http://localhost:3000" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
+          <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
           
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="font-size: 12px; color: #999;">Dette er en automatisert påminnelse.</p>

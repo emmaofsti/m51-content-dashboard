@@ -85,10 +85,12 @@ export async function GET(request: NextRequest) {
 
 
         // 2. Construct Email
+        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
         const { data, error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: 'emma@m51.no', // Testing: Send to Emma only
-            subject: 'Kanskje tid for å skirve noe til nettsiden?😝',
+            subject: `Team Status: ${capitalizedMonth} 🚀`,
             html: `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #ff3b3f;">Hei fine deg! 👋</h2>
@@ -111,7 +113,7 @@ export async function GET(request: NextRequest) {
           <br/>
           
           <p>👉 Legg inn bidraget ditt i <strong>Nettsideinnhold – Oversikt</strong> når du er i gang:<br/>
-          <a href="http://localhost:3000/nettsideinnhold" style="color: #ff3b3f; text-decoration: none;">http://localhost:3000/nettsideinnhold</a></p>
+          <a href="https://m51-content-dashboard.vercel.app/nettsideinnhold" style="color: #ff3b3f; text-decoration: none;">https://m51-content-dashboard.vercel.app/nettsideinnhold</a></p>
           
           <br/>
 

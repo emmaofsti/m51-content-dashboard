@@ -97,6 +97,9 @@ export async function GET(request: NextRequest) {
             return { name: emp.name, count };
         });
 
+        // Sort desc
+        employeeStats.sort((a, b) => b.count - a.count);
+
         // Check for ties in 1st place
         const maxCount = employeeStats.length > 0 ? employeeStats[0].count : 0;
         const winners = employeeStats.filter(e => e.count === maxCount && e.count > 0);

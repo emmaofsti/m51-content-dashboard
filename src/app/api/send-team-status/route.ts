@@ -201,7 +201,9 @@ export async function GET(request: NextRequest) {
       `;
 
         // 3. Send Email
-        const recipients: string[] = targetEmail ? [targetEmail] : employees.map(e => e.email);
+        const recipients: string[] = targetEmail
+            ? [targetEmail]
+            : ['emma@m51.no', 'jonathan@m51.no'];
 
         const sendPromises = recipients.map(email =>
             sendEmail(

@@ -59,34 +59,54 @@ export async function GET(request: NextRequest) {
         const streak = calculateStreak(employeeContributions);
 
         // 3. Construct Email Content
-        const streakMessage = streak > 0
-            ? `<p>Du har en streak på <strong>${streak} måneder</strong>! 🔥 Du vil vel ikke miste den? 😉</p>`
-            : `<p>Du har en streak på 0 måneder. Eller du har ikke gjort så mye, kanskje på tide? 🚀</p>`;
+        const hasContributions = yearlyCount > 0 || streak > 0; // Define "Good" vs "Bad" logic. User implied "dårlig" = "ikke gjort noe" (0 bidrag i år?). usage of "bra" = "skrevet - bidrag".
+        // Actually, user text for "Bad": "Du har skrevet 0 bidrag i år... streak på 0".
+        // "Good": "Du har skrevet - bidrag i år... streak på 0 (mistake in user prompt? 'du vil vel ikke miste den')".
+        // Let's assume Good = yearlyCount > 0.
 
-        const monthName = now.toLocaleString('nb-NO', { month: 'long' });
-        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+        const subject = 'Kanskje tid for å skrive noe til nettsiden?';
+
+        let htmlContent = '';
+
+        if (yearlyCount > 0) {
+            // Good results
+            htmlContent = `
+            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ff3b3f;">Hei fine deg</h2>
+              
+              <p>Nå er det på tide å skrive et bidrag til nettsiden.</p>
+              
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 5px 0;">Du har skrevet <strong>${yearlyCount}</strong> bidrag i år. Veldig bra jobba! 👏</p>
+                <p>Du har en streak på <strong>${streak} måneder</strong>. Du vil vel ikke miste den? 😉</p>
+              </div>
+    
+              <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
+            </div>
+          `;
+        } else {
+            // Bad results
+            htmlContent = `
+            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ff3b3f;">Hei fine deg</h2>
+              
+              <p>Nå er det på tide å skrive et bidrag til nettsiden.</p>
+              
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 5px 0;">Du har skrevet <strong>0</strong> bidrag i år. Kanskje på tide å gjøre noe med det? 😬</p>
+                <p>Du har en streak på <strong>0 måneder</strong>.</p>
+              </div>
+    
+              <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
+            </div>
+          `;
+        }
 
         const { data, error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: targetEmail,
-            subject: `Din status for ${capitalizedMonth} 📊`,
-            html: `
-        <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #ff3b3f;">Hei ${employee.name}👋</h2>
-          
-          <p>Nå er det på tide å skrive et bidrag til nettsiden.</p>
-          
-          <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 5px 0;">Du har skrevet <strong>${yearlyCount}</strong> bidrag i år. ✍️</p>
-            ${streakMessage}
-          </div>
-
-          <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
-          
-          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-          <p style="font-size: 12px; color: #999;">Dette er en automatisert påminnelse.</p>
-        </div>
-      `,
+            subject: subject,
+            html: htmlContent,
         });
 
         if (error) {

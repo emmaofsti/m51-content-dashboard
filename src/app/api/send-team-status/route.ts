@@ -78,41 +78,60 @@ export async function GET(request: NextRequest) {
         ).length;
 
 
+        // ... existing stats calculation ...
+
+        // --- Top 3 Contributors (YTD) ---
+        // distinct employees
+        const employeeStats = employees.map(emp => {
+            const count = contributions.filter(c =>
+                c.employee_id === emp.id &&
+                c.status === 'Published' &&
+                c.date.startsWith(currentYear.toString())
+            ).length;
+            return { name: emp.name, count };
+        });
+
+        // Sort desc
+        employeeStats.sort((a, b) => b.count - a.count);
+
+        // Take top 3 (only if count > 0)
+        const top3 = employeeStats.filter(e => e.count > 0).slice(0, 3);
+
+        const top3List = top3.map((e, i) => `<li>${i + 1}. ${e.name} (${e.count} bidrag) 🏆</li>`).join('');
+
+
         // 2. Construct Email
         const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
         const { data, error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: 'emma@m51.no', // Testing: Send to Emma only
-            subject: `Team Status: ${capitalizedMonth} 🚀`,
+            subject: `Status nettsideinnhold: ${capitalizedMonth}`,
             html: `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #ff3b3f;">Hei fine deg! 👋</h2>
           
-          <p>Det er første tirsdag i måneden, og det betyr: <strong>tid for månedens bidrag til nettsiden</strong> (1 stk per person).</p>
+          <p>Her kommer en oppdatering på nettsideinnhold hittil.</p>
           
-          <br/>
-
-          <h3 style="margin-bottom: 5px;">Status – året så langt (YTD):</h3>
+          <h3 style="margin-bottom: 5px;">Status – året så langt:</h3>
           <ul style="padding-left: 20px;">
-            <li>Publisert: <strong>${ytdPublished} / ${ytdGoal}</strong> (${ytdPercent}%)</li>
+            <li>Publisert: <strong>${ytdPublished}</strong></li>
+          </ul>
+
+          <h4 style="margin-bottom: 5px;">Topp 3 bidragsytere:</h4>
+          <ul style="padding-left: 20px; list-style: none;">
+            ${top3List || '<li>Ingen enda... bli den første!</li>'}
           </ul>
 
           <h3 style="margin-bottom: 5px;">Denne måneden (${monthName}):</h3>
           <ul style="padding-left: 20px;">
-            <li>Mål: <strong>${monthGoal}</strong> bidrag (1 per person)</li>
+            <li>Mål: <strong>${monthGoal}</strong> bidrag (7 stk)</li>
             <li>Så langt: <strong>${monthPublished} / ${monthGoal}</strong></li>
           </ul>
 
-          <br/>
-          
-          <p>👉 Legg inn bidraget ditt i <strong>Nettsideinnhold – Oversikt</strong> når du er i gang:<br/>
-          <a href="https://m51-content-dashboard.vercel.app/nettsideinnhold" style="color: #ff3b3f; text-decoration: none;">https://m51-content-dashboard.vercel.app/nettsideinnhold</a></p>
-          
-          <br/>
+          <p>Måneden er ikke over. Du kan fortsatt legge ut noe!</p>
 
-          <p>Takk for at dere bygger synlighet sammen 🚀<br/>
-          – Content Tracker</p>
+          <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
         </div>
       `,
         });

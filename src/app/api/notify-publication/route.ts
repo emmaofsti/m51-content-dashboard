@@ -17,22 +17,10 @@ export async function POST(request: Request) {
 
         const { data, error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
-            to: 'emma@m51.no', // Updated recipient
-            subject: subject,
+            to: 'jonathan@m51.no', // Should be Jonathan
+            subject: `Nytt bidrag: ${title}`,
             html: `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #ff3b3f;">Hei Emma 👋</h2>
-          
-          <p>Oioi – jobben kaller 😎</p>
-          
-          <p>Noen har nettopp <strong>publisert nytt innhold på nettsiden</strong>:</p>
-          <p style="font-size: 1.2rem; font-weight: bold; margin: 1rem 0;">${title || 'Ukjent tittel'}</p>
-          <p>Ta en titt, og få det ut på Instagram når det passer!</p>
-          
-          <br/>
-          
-          <p>Dette klarer du lett.</p>
-          <p>Du er god. 🚀</p>
           
           <br/>
           <p>– Content Tracker</p>

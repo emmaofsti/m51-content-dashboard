@@ -32,6 +32,10 @@ export async function GET(request: NextRequest) {
         // 1. Get stats from Database
         const { rows: contributions } = await sql`SELECT * FROM contributions`;
 
+        console.log('Total contributions fetched:', contributions.length);
+
+        // --- Top 3 Contributors (YTD) ---
+
         // Map snake_case DB columns to property names used in logic (if needed), or adjust logic.
         // Logic below uses .status and .date. DB has status and date.
         // Logic filters by c.status === 'Published'. 

@@ -91,7 +91,11 @@ function DashboardContent() {
 
     // Check if published and trigger notification
     if (newContribution.status === 'Published') {
-      fetch('/api/notify-publication', { method: 'POST' })
+      fetch('/api/notify-publication', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newContribution.title })
+      })
         .catch(err => console.error('Failed to send notification:', err));
     }
 

@@ -1,11 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { Resend } from 'resend';
 import { employees } from '../../../data/employees';
 import { sql } from '@vercel/postgres';
 import { isLastTuesdayOfMonth } from '../../../utils/date';
-
-// Initialize Resend with the API key safely
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+import { sendEmail } from '../../../utils/email';
 
 export const dynamic = 'force-dynamic'; // Prevent caching
 
@@ -18,6 +15,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const force = searchParams.get('force') === 'true';
+        const targetEmail = searchParams.get('email');
 
         const now = new Date();
         const isScheduledTime = isLastTuesdayOfMonth(now);
@@ -26,9 +24,9 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'Skipped: Not the first Tuesday of the month' });
         }
 
-        if (!resend) {
-            console.warn('RESEND_API_KEY missing, skipping team email');
-            return NextResponse.json({ message: 'Skipped: No API Key' });
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+            console.warn('Email credentials missing, skipping team email');
+            return NextResponse.json({ message: 'Skipped: No Email Credentials' });
         }
 
         // 1. Get stats from Database
@@ -175,11 +173,7 @@ export async function GET(request: NextRequest) {
         // 2. Construct Email
         const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
-        const { data, error } = await resend.emails.send({
-            from: 'onboarding@resend.dev',
-            to: 'emma@m51.no', // Testing: Send to Emma only
-            subject: `Status nettsideinnhold: ${capitalizedMonth}`,
-            html: `
+        const htmlContent = `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #ff3b3f;">Hei fine deg! 👋</h2>
 
@@ -204,17 +198,33 @@ export async function GET(request: NextRequest) {
 
           <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
         </div>
-      `,
-        });
+      `;
 
-        if (error) {
-            console.error('Error sending team email:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+        // 3. Send Email
+        const recipients: string[] = targetEmail ? [targetEmail] : employees.map(e => e.email);
+
+        const sendPromises = recipients.map(email =>
+            sendEmail(
+                email,
+                `Status nettsideinnhold: ${capitalizedMonth}`,
+                htmlContent
+            )
+        );
+
+        const results = await Promise.all(sendPromises);
+        const errors = results.filter(r => r.error);
+
+        if (errors.length === recipients.length && recipients.length > 0) {
+            console.error('All emails failed:', errors);
+            return NextResponse.json({ error: 'All emails failed' }, { status: 500 });
         }
 
         return NextResponse.json({
             message: 'Team email sent successfully',
-            data
+            data: {
+                sent: results.length - errors.length,
+                failed: errors.length
+            }
         });
 
     } catch (error) {

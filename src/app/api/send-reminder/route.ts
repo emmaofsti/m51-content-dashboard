@@ -1,12 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { Resend } from 'resend';
 import { employees } from '../../../data/employees';
 import { calculateStreak } from '../../../utils/stats';
 import { isFirstTuesdayOfMonth } from '../../../utils/date';
 import { sql } from '@vercel/postgres';
-
-// Initialize Resend with the API key safely
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+import { sendEmail } from '../../../utils/email';
 
 export async function GET(request: NextRequest) {
     try {
@@ -22,11 +19,6 @@ export async function GET(request: NextRequest) {
         // Also check if we are in testing mode (force=true bypasses this)
         if (!force && !isScheduledTuesday) {
             return NextResponse.json({ message: 'Skipped: Not scheduled time' });
-        }
-
-        if (!resend) {
-            console.warn('RESEND_API_KEY missing, skipping email send');
-            return NextResponse.json({ message: 'Skipped: No API Key' });
         }
 
         // 1. Get Employee data
@@ -105,16 +97,11 @@ export async function GET(request: NextRequest) {
           `;
         }
 
-        const { data, error } = await resend.emails.send({
-            from: 'onboarding@resend.dev',
-            to: targetEmail,
-            subject: subject,
-            html: htmlContent,
-        });
+        const { data, error } = await sendEmail(targetEmail, subject, htmlContent);
 
         if (error) {
             console.error('Error sending email:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+            return NextResponse.json({ error: error }, { status: 500 });
         }
 
         return NextResponse.json({

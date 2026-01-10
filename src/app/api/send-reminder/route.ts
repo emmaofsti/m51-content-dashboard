@@ -93,7 +93,15 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ message: 'Email sent successfully', data });
+        return NextResponse.json({
+            message: 'Email sent successfully',
+            data,
+            debug: {
+                to: 'emma@m51.no',
+                subject: `Din status for ${capitalizedMonth} 📊`,
+                monthName: monthName
+            }
+        });
     } catch (error) {
         console.error('Unexpected error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

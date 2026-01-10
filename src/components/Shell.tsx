@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { usePathname } from "next/navigation";
+import styles from "./Shell.module.css";
 
 export function Shell({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -14,74 +15,33 @@ export function Shell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div style={{ minHeight: "100vh" }}>
+        <div className={styles.shell}>
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    position: "fixed",
-                    top: "4rem",
-                    left: "1rem",
-                    zIndex: 200,
-                    background: "var(--background)",
-                    border: "1px solid rgba(0,0,0,0.1)",
-                    borderRadius: "8px",
-                    padding: "0.5rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.05)"
-                }}
+                className={styles.toggleButton}
+                aria-label="Toggle menu"
             >
                 {isOpen ? "✕" : "☰"}
             </button>
 
             {/* Sidebar */}
-            <div
-                style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    height: "100vh",
-                    width: "250px", // Explicit width for transform
-                    transform: isOpen ? "translateX(0)" : "translateX(-100%)",
-                    transition: "transform 0.3s ease",
-                    zIndex: 100,
-                }}
-            >
+            <div className={`${styles.sidebarContainer} ${isOpen ? styles.open : ''}`}>
                 <Sidebar />
             </div>
 
-            {/* Main Content */}
-            <div
-                style={{
-                    transition: "margin-left 0.3s ease",
-                    marginLeft: isOpen ? "250px" : "0", // Push content when open
-                    paddingTop: "4rem", // Space for the toggle button
-                    paddingLeft: "2rem",
-                    paddingRight: "2rem"
-                }}
-            >
-                {children}
-            </div>
-
-            {/* Overlay for mobile (optional, but good for UX) */}
+            {/* Overlay for mobile */}
             {isOpen && (
                 <div
+                    className={styles.overlay}
                     onClick={() => setIsOpen(false)}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.2)',
-                        zIndex: 90,
-                        display: 'none' // Hidden for now, simplified to Push layout
-                    }}
                 />
             )}
+
+            {/* Main Content */}
+            <main className={styles.mainContent}>
+                {children}
+            </main>
         </div>
     );
 }

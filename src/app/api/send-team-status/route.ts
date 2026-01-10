@@ -7,6 +7,8 @@ import { isLastTuesdayOfMonth } from '../../../utils/date';
 // Initialize Resend with the API key safely
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+export const dynamic = 'force-dynamic'; // Prevent caching
+
 const MONTH_NAMES = [
     "januar", "februar", "mars", "april", "mai", "juni",
     "juli", "august", "september", "oktober", "november", "desember"
@@ -201,7 +203,17 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ message: 'Team email sent successfully', data });
+        return NextResponse.json({
+            message: 'Team email sent successfully',
+            data,
+            debug: {
+                sortedStats: employeeStats.slice(0, 5),
+                top3: top3,
+                first: first,
+                second: second,
+                third: third
+            }
+        });
 
     } catch (error) {
         console.error('Unexpected error:', error);

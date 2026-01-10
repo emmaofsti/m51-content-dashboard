@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
         // distinct employees
         const employeeStats = employees.map(emp => {
             const count = contributions.filter(c =>
-                c.employee_id === emp.id &&
+                c.employee_id == emp.id &&
                 c.status === 'Published' &&
                 c.date.startsWith(currentYear.toString())
             ).length;
@@ -129,6 +129,7 @@ export async function GET(request: NextRequest) {
                 <tr>
                     <!-- 2nd Place -->
                     <td valign="bottom" width="33%" style="padding: 0 5px;">
+                        <div style="font-size: 12px; color: #999; margin-bottom: 5px;">2. plass</div>
                         <div style="font-size: 1.5rem;">🥈</div>
                         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${second.count > 0 ? second.name : ''}</div>
                         <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${second.count > 0 ? second.count + ' bidrag' : ''}</div>
@@ -138,6 +139,7 @@ export async function GET(request: NextRequest) {
 
                     <!-- 1st Place -->
                     <td valign="bottom" width="33%" style="padding: 0 5px;">
+                        <div style="font-size: 12px; color: #BDED62; font-weight: bold; margin-bottom: 5px;">1. PLASS</div>
                         <div style="font-size: 2rem;">🏆</div>
                         <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${first.count > 0 ? first.name : ''}</div>
                         <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${first.count > 0 ? first.count + ' bidrag' : ''}</div>
@@ -147,6 +149,7 @@ export async function GET(request: NextRequest) {
 
                     <!-- 3rd Place -->
                     <td valign="bottom" width="33%" style="padding: 0 5px;">
+                        <div style="font-size: 12px; color: #999; margin-bottom: 5px;">3. plass</div>
                         <div style="font-size: 1.5rem;">🥉</div>
                         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${third.count > 0 ? third.name : ''}</div>
                         <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${third.count > 0 ? third.count + ' bidrag' : ''}</div>

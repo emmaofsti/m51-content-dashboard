@@ -1,0 +1,80 @@
+.main {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.title {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+}
+
+.card {
+    background: #171218;
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+    /* Ensure table doesn't get squashed */
+}
+
+.th {
+    padding: 1rem;
+    color: #bded62;
+    font-weight: bold;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+}
+
+.td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.positionBadge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    background: #171218;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: 2rem 1rem;
+    }
+
+    .title {
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .th,
+    .td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+}

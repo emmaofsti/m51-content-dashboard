@@ -34,14 +34,10 @@ export default function HistorikkPage() {
     });
 
     return (
-        <main style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', fontWeight: 'bold', color: '#ffffff' }}>Historikk ({targetYear})</h1>
+        <main className={styles.main}>
+            <h1 className={styles.title}>Historikk ({targetYear})</h1>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '1.5rem'
-            }}>
+            <div className={styles.grid}>
                 {months.map((month) => (
                     month.isFuture ? (
                         // Future Card (Blurred / Disabled)
@@ -49,7 +45,7 @@ export default function HistorikkPage() {
                             key={month.name}
                             className={styles.futureCard}
                         >
-                            <h2 className={styles.title} style={{ opacity: 0.5 }}>
+                            <h2 className={styles.cardTitle} style={{ opacity: 0.5 }}>
                                 {month.name}
                             </h2>
                             <div style={{ filter: 'blur(4px)', opacity: 0.3, userSelect: 'none' }}>
@@ -65,7 +61,7 @@ export default function HistorikkPage() {
                             href={`/?month=${month.iso}`}
                             className={styles.card}
                         >
-                            <h2 className={styles.title}>
+                            <h2 className={styles.cardTitle}>
                                 {month.name}
                             </h2>
                             <p className={styles.subtitle}>

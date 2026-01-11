@@ -39,6 +39,7 @@ export default function RapportPage() {
     return (
         <main className={styles.main}>
             <h1 className={styles.title}>SEO Rapport – Siste 30 dager</h1>
+            <p style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '-0.5rem', marginBottom: '1.5rem', fontStyle: 'italic' }}>presise tall kommer</p>
 
             {/* Overview Cards (From GSC API) */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>

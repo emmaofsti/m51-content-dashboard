@@ -170,6 +170,54 @@ export async function GET(request: NextRequest) {
             ` : '<p style="text-align: center; color: #999;">Ingen bidrag enda i år.</p>';
         }
 
+        // --- Honorable Mention (Comeback) Logic ---
+        const honorableMentions = employees.filter(emp => {
+            // 1. Did they contribute THIS month?
+            const contributedThisMonth = contributions.some(c =>
+                c.employee_id == emp.id &&
+                c.status === 'Published' &&
+                c.date.startsWith(currentMonthString)
+            );
+            if (!contributedThisMonth) return false;
+
+            // 2. Did they have a "pause" of > 3 months?
+            const userDates = contributions
+                .filter(c => c.employee_id == emp.id && c.status === 'Published')
+                .map(c => new Date(c.date)) // Assumes YYYY-MM-DD string
+                .sort((a, b) => b.getTime() - a.getTime());
+
+            // userDates[0] is likely this month (since we confirmed contribution).
+            // Find the breakdown point.
+
+            const startOfThisMonth = new Date(currentYear, currentMonth, 1);
+
+            // Find the most recent contribution strictly BEFORE this month
+            const lastPreviousDate = userDates.find(d => d < startOfThisMonth);
+
+            if (!lastPreviousDate) return false; // No history = new user = not a comeback
+
+            // Calculate gap in months
+            const diffMonths = (startOfThisMonth.getFullYear() - lastPreviousDate.getFullYear()) * 12 +
+                (startOfThisMonth.getMonth() - lastPreviousDate.getMonth());
+
+            // "Over 3 mnd" -> Gap > 3. (e.g. May - Jan = 4).
+            return diffMonths > 3;
+        });
+
+        let honorableMentionHtml = '';
+        if (honorableMentions.length > 0) {
+            honorableMentions.forEach(emp => {
+                honorableMentionHtml += `
+                 <div style="margin-top: 30px; padding: 15px; border: 2px dashed #ff3b3f; border-radius: 8px; text-align: center; background-color: #fff5f5;">
+                    <div style="font-size: 18px; font-weight: bold; color: #ff3b3f;">🏅 Honorable mention:</div>
+                    <p style="font-size: 16px; margin: 10px 0 0 0; line-height: 1.4;">
+                        <strong>${emp.name}</strong> har tidenes comeback – tilbake på content-kjøret igjen etter noen måneders pause! 🔥
+                    </p>
+                 </div>
+                `;
+            });
+        }
+
         // 2. Construct Email
         const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
@@ -187,8 +235,10 @@ export async function GET(request: NextRequest) {
           <h4 style="margin-bottom: 5px; text-align: center;">Topp 3 bidragsytere 🏆</h4>
 
           ${topContentHtml}
+          
+          ${honorableMentionHtml}
 
-          <h3 style="margin-bottom: 5px;">Denne måneden (${monthName}):</h3>
+          <h3 style="margin-bottom: 5px; margin-top: 30px;">Denne måneden (${monthName}):</h3>
           <ul style="padding-left: 20px;">
             <li>Mål: <strong>${monthGoal}</strong> bidrag (7 stk)</li>
             <li>Så langt: <strong>${monthPublished} / ${monthGoal}</strong></li>

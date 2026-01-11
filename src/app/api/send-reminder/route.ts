@@ -89,12 +89,7 @@ export async function GET(request: NextRequest) {
               `;
       } else {
         // Bad results - Randomized "Tough" vs "Kind"
-        // Allow enforcing via query param for testing: ?testVariant=kind
-        const testVariant = searchParams.get('testVariant');
-
-        let isKindVersion = Math.random() < 0.5;
-        if (testVariant === 'kind') isKindVersion = true;
-        if (testVariant === 'tough') isKindVersion = false;
+        const isKindVersion = Math.random() < 0.5;
 
         if (isKindVersion) {
           // KIND VERSION

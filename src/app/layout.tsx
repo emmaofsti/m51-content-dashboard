@@ -19,6 +19,29 @@ const nunito = Nunito_Sans({
 export const metadata: Metadata = {
   title: "M51 Content Dashboard",
   description: "Internal content tracking",
+  metadataBase: new URL("https://m51.no"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "M51 Content Dashboard",
+    description: "Internal content tracking",
+    url: "https://m51.no",
+    siteName: "M51 Content Dashboard",
+    locale: "nb_NO",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   verification: {
     google: "l_3k6VrlpbPoPEQ8j4KGR2Wkk7B_Il_nKGjbMZfCzPs",
   },

@@ -2,12 +2,16 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 3600; // Cache for 1 hour
+export const revalidate = 0;
 
 export async function GET() {
     try {
         const client_email = process.env.GOOGLE_CLIENT_EMAIL;
         const private_key = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'); // Handle newlines in env var
+
+        console.log("SEO API: Checking credentials...");
+        console.log("Email present:", !!client_email);
+        console.log("Key present:", !!private_key);
 
         if (!client_email || !private_key) {
             console.warn('Missing Google Credentials');
@@ -51,6 +55,7 @@ export async function GET() {
         });
 
         const rows = responseCallback.data.rows || [];
+        console.log("SEO API: Rows returned:", rows.length);
 
         let totalClicks = 0;
         let totalImpressions = 0;
@@ -74,14 +79,15 @@ export async function GET() {
                 startDate: formattedStartDate,
                 endDate: formattedEndDate,
                 dimensions: ['query'],
-                rowLimit: 5
+                rowLimit: 500
             }
         });
 
         const topQueries = (queryResponse.data.rows || []).map(row => ({
             query: row.keys ? row.keys[0] : 'Unknown',
             clicks: row.clicks || 0,
-            impressions: row.impressions || 0
+            impressions: row.impressions || 0,
+            position: row.position || 0
         }));
 
         return NextResponse.json({

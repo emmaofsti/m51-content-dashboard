@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       const streak = calculateStreak(employeeContributions);
 
       let htmlContent = '';
-      const subject = 'Kanskje tid for å skrive noe til nettsiden? 😝';
+      let subject = 'Kanskje tid for å skrive noe til nettsiden? 😝';
 
       if (yearlyCount > 0) {
         // Good results
@@ -88,21 +88,45 @@ export async function GET(request: NextRequest) {
                 </div>
               `;
       } else {
-        // Bad results
-        htmlContent = `
-                <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                  <h2 style="color: #ff3b3f;">Hei ${employee.name}</h2>
-                  
-                  <p>Nå er det på tide å skrive et bidrag til nettsiden.</p>
-                  
-                  <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <p style="margin: 5px 0;">Du har skrevet <strong>0</strong> bidrag i år. Kanskje på tide å gjøre noe med det?</p>
-                    <p>Du har en streak på <strong>0 måneder</strong>.</p>
-                  </div>
-        
-                  <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
-                </div>
-              `;
+        // Bad results - Randomized "Tough" vs "Kind"
+        const isKindVersion = Math.random() < 0.5;
+
+        if (isKindVersion) {
+          // KIND VERSION
+          subject = 'Kanskje tid for å skrive noe til nettsiden?';
+          htmlContent = `
+            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ff3b3f;">Hei fine deg 👋</h2>
+              
+              <p>Liten påminnelse om nettsiden vår!</p>
+              
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 5px 0;">Så langt i år har du ikke registrert noen bidrag – og det er helt greit, men kanskje denne måneden er måneden?</p>
+                <p>Streaken din er på <strong>0 måneder</strong> akkurat nå.</p>
+                <p style="margin-top: 10px;">Perfekt tidspunkt å starte 😉</p>
+              </div>
+    
+              <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> og registrer når du har lagt ut noe.</p>
+              <p style="color: #888; margin-top: 20px;">– Content Tracker</p>
+            </div>
+          `;
+        } else {
+          // TOUGH VERSION (Original)
+          htmlContent = `
+            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ff3b3f;">Hei ${employee.name}</h2>
+              
+              <p>Nå er det på tide å skrive et bidrag til nettsiden.</p>
+              
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 5px 0;">Du har skrevet <strong>0</strong> bidrag i år. Kanskje på tide å gjøre noe med det?</p>
+                <p>Du har en streak på <strong>0 måneder</strong>.</p>
+              </div>
+    
+              <p>Logg inn på <a href="https://m51-content-dashboard.vercel.app" style="color: #ff3b3f; text-decoration: none; font-weight: bold;">Content Tracker</a> for å registrere status.</p>
+            </div>
+          `;
+        }
       }
 
       const { data, error } = await sendEmail(employee.email, subject, htmlContent);

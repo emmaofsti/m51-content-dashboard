@@ -61,10 +61,16 @@ export async function GET(request: NextRequest) {
     for (const employee of targetEmployees) {
       const employeeContributions = allContributions.filter((c: any) => c.employeeId === employee.id);
 
-      const yearlyCount = employeeContributions.filter((c: any) =>
+      let yearlyCount = employeeContributions.filter((c: any) =>
         c.status === 'Published' &&
         c.date.startsWith(currentYear.toString())
       ).length;
+
+      // TEMPORARY TEST: Force stats to 0 to trigger "Kind" email logic
+      const forceTestKind = searchParams.get('test_kind') === 'true';
+      if (forceTestKind) {
+        yearlyCount = 0;
+      }
 
       const streak = calculateStreak(employeeContributions);
 
@@ -89,7 +95,8 @@ export async function GET(request: NextRequest) {
               `;
       } else {
         // Bad results - Randomized "Tough" vs "Kind"
-        const isKindVersion = Math.random() < 0.5;
+        let isKindVersion = Math.random() < 0.5;
+        if (forceTestKind) isKindVersion = true;
 
         if (isKindVersion) {
           // KIND VERSION

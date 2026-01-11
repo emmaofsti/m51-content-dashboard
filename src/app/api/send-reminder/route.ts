@@ -66,12 +66,6 @@ export async function GET(request: NextRequest) {
         c.date.startsWith(currentYear.toString())
       ).length;
 
-      // TEMPORARY TEST: Force stats to 0 to trigger "Kind" email logic
-      const forceTestKind = searchParams.get('test_kind') === 'true';
-      if (forceTestKind) {
-        yearlyCount = 0;
-      }
-
       const streak = calculateStreak(employeeContributions);
 
       let htmlContent = '';
@@ -95,8 +89,7 @@ export async function GET(request: NextRequest) {
               `;
       } else {
         // Bad results - Randomized "Tough" vs "Kind"
-        let isKindVersion = Math.random() < 0.5;
-        if (forceTestKind) isKindVersion = true;
+        const isKindVersion = Math.random() < 0.5;
 
         if (isKindVersion) {
           // KIND VERSION

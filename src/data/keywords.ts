@@ -63,6 +63,7 @@ export const importedKeywords: KeywordData[] = [
     { keyword: "markedsføring på nett", volume: 110, position: null, change: 0, url: "" },
     { keyword: "markedsbyrå", volume: 110, position: null, change: 0, url: "" },
     { keyword: "m51", volume: 210, position: 1, change: 0, url: "https://m51.no/" },
+    { keyword: "m51 marketing", volume: 50, position: 1, change: 0, url: "https://m51.no/" },
     { keyword: "livestream", volume: 10, position: null, change: 0, url: "" },
     { keyword: "live streaming oslo", volume: 10, position: null, change: 0, url: "" },
     { keyword: "linkedin annonsering", volume: 110, position: null, change: 0, url: "" },

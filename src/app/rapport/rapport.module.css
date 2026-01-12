@@ -1,80 +1,115 @@
 .main {
-    padding: 4rem 2rem;
+    padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .title {
     font-size: 2.5rem;
-    margin-bottom: 3rem;
     font-weight: bold;
-    text-align: center;
-    color: #ffffff;
+    color: #fff;
+    margin-bottom: 2rem;
+    font-family: 'Urbanist', sans-serif;
 }
 
 .card {
-    background: #171218;
-    border-radius: 12px;
-    padding: 2rem;
+    background: rgba(255, 255, 255, 0.01);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    /* overflow: hidden; Removed to allow tooltips to show */
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Spotlight Effect Removed - moving to global background */
+
 .tableWrapper {
-    width: 100%;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    /* Smooth scrolling on iOS */
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px;
-    /* Ensure table doesn't get squashed */
+    font-size: 0.9rem;
 }
 
 .th {
-    padding: 1rem;
-    color: #bded62;
-    font-weight: bold;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    background: transparent;
+    color: #BDED62;
+    font-weight: 600;
+    border-bottom: 1px solid #333;
     white-space: nowrap;
 }
 
 .td {
     padding: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid #222;
+    color: #fff;
 }
 
-.positionBadge {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 20px;
-    background: #171218;
-    color: white;
+.helpIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #333;
+    color: #aaa;
+    font-size: 11px;
     font-weight: bold;
-    font-size: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: help;
+    margin-left: 6px;
+    border: 1px solid #444;
 }
 
-@media (max-width: 768px) {
-    .main {
-        padding: 2rem 1rem;
-    }
+.helpIcon:hover {
+    background: #BDED62;
+    color: #000;
+    border-color: #BDED62;
+}
 
-    .title {
-        font-size: 1.8rem;
-        margin-bottom: 2rem;
-    }
+.helpIconContainer {
+    position: relative;
+    display: inline-block;
+}
 
-    .card {
-        padding: 1rem;
-    }
+.tooltipContent {
+    position: absolute;
+    top: 140%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: normal;
+    width: max-content;
+    max-width: 200px;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
 
-    .th,
-    .td {
-        padding: 0.75rem 0.5rem;
-        font-size: 0.9rem;
-    }
+.tooltipContent::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #222 transparent;
 }

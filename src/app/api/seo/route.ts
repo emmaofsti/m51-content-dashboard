@@ -95,7 +95,11 @@ export async function GET() {
             impressions: totalImpressions,
             ctr: avgCtr,
             position: avgPosition,
-            topQueries
+            topQueries,
+            debug: {
+                siteUrl: 'sc-domain:m51.no',
+                email: client_email
+            }
         });
 
     } catch (error: any) {

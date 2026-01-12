@@ -48,22 +48,57 @@ export default function RapportPage() {
     // Silent error handling to not scare user if GSC is empty
     const [error, setError] = useState('');
 
+    const [lastUpdated, setLastUpdated] = useState<string>('');
+    const [debugInfo, setDebugInfo] = useState<any>(null);
+
     useEffect(() => {
-        fetch('/api/seo')
+        setLoading(true);
+        fetch('/api/seo?t=' + Date.now())
             .then(res => res.json())
             .then(data => {
-                if (data.error) console.warn("SEO API Warning:", data.error);
-                setData(data); // Even if empty, set it
+                if (data.error) {
+                    console.error("SEO API Error:", data.error);
+                    setError(data.error);
+                }
+                setData(data);
+                setDebugInfo(data.debug);
+                setLastUpdated(new Date().toLocaleTimeString('nb-NO'));
             })
             .catch(err => {
                 console.error("Failed to load SEO data", err);
+                setError('Kunne ikke koble til API-et');
             })
             .finally(() => setLoading(false));
     }, []);
 
     return (
         <main className={styles.main}>
-            <h1 className={styles.title}>SEO Rapport – Siste 30 dager</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h1 className={styles.title} style={{ marginBottom: 0 }}>SEO Rapport – Siste 30 dager</h1>
+                {lastUpdated && (
+                    <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                        Oppdatert: {lastUpdated}
+                    </span>
+                )}
+            </div>
+
+            {error && (
+                <div style={{
+                    background: 'rgba(255, 59, 63, 0.1)',
+                    border: '1px solid #ff3b3f',
+                    color: '#ff3b3f',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    marginBottom: '2rem',
+                    fontSize: '0.9rem'
+                }}>
+                    <strong>Status:</strong> {error}
+                    <br />
+                    <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                        Sjekk at <strong>{debugInfo?.email || 'service-brukeren'}</strong> har fått tilgang til eiendommen <strong>{debugInfo?.siteUrl || 'm51.no'}</strong> i Google Search Console.
+                    </span>
+                </div>
+            )}
 
             {/* Overview Cards (From GSC API) */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>

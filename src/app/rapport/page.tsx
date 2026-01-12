@@ -198,9 +198,8 @@ export default function RapportPage() {
                 </div>
             </div>
 
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
                 Søkeord (Rank Tracker)
-                <span style={{ fontSize: '0.8rem', color: '#aaa', fontStyle: 'italic', fontWeight: 'normal' }}>flere søkeord kommer</span>
             </h2>
 
             {/* Detailed Table (From Imported Manual Data) */}

@@ -43,9 +43,46 @@ export async function GET() {
         const formattedEndDate = endDate.toISOString().split('T')[0];
         const formattedStartDate = startDate.toISOString().split('T')[0];
 
-        // Fetch Totals
-        const responseCallback = await searchConsole.searchanalytics.query({
-            siteUrl: 'sc-domain:m51.no', // Domain property format
+        const propertyFormats = [
+            'sc-domain:m51.no',
+            'https://m51.no/',
+            'https://www.m51.no/'
+        ];
+
+        let rows: any[] = [];
+        let successUrl = '';
+
+        for (const url of propertyFormats) {
+            try {
+                console.log(`SEO API: Trying property ${url}...`);
+                const res = await searchConsole.searchanalytics.query({
+                    siteUrl: url,
+                    requestBody: {
+                        startDate: formattedStartDate,
+                        endDate: formattedEndDate,
+                        dimensions: ['date'],
+                        rowLimit: 10
+                    }
+                });
+                if (res.data.rows && res.data.rows.length > 0) {
+                    rows = res.data.rows;
+                    successUrl = url;
+                    console.log(`SEO API: Success with ${url}`);
+                    break;
+                }
+            } catch (e: any) {
+                console.warn(`SEO API: Failed for ${url}:`, e.message);
+            }
+        }
+
+        // If no data found with date dimension, just pick the first one and try queries anyway
+        if (!successUrl) {
+            successUrl = propertyFormats[0];
+            console.warn("SEO API: No data found in any property format. Falling back to default.");
+        }
+
+        const totalsResponse = rows.length > 0 ? { data: { rows } } : await searchConsole.searchanalytics.query({
+            siteUrl: successUrl,
             requestBody: {
                 startDate: formattedStartDate,
                 endDate: formattedEndDate,
@@ -54,15 +91,13 @@ export async function GET() {
             }
         });
 
-        const rows = responseCallback.data.rows || [];
-        console.log("SEO API: Rows returned:", rows.length);
-
+        const finalRows = totalsResponse.data.rows || [];
         let totalClicks = 0;
         let totalImpressions = 0;
         let weightedPosition = 0;
         let weightedCtr = 0;
 
-        rows.forEach(row => {
+        finalRows.forEach(row => {
             totalClicks += row.clicks || 0;
             totalImpressions += row.impressions || 0;
             weightedPosition += (row.position || 0) * (row.impressions || 0);
@@ -72,9 +107,9 @@ export async function GET() {
         const avgPosition = totalImpressions > 0 ? weightedPosition / totalImpressions : 0;
         const avgCtr = totalImpressions > 0 ? weightedCtr / totalImpressions : 0;
 
-        // Fetch Top Queries
+        // Fetch Top Queries using the successful URL
         const queryResponse = await searchConsole.searchanalytics.query({
-            siteUrl: 'sc-domain:m51.no',
+            siteUrl: successUrl,
             requestBody: {
                 startDate: formattedStartDate,
                 endDate: formattedEndDate,
@@ -97,8 +132,10 @@ export async function GET() {
             position: avgPosition,
             topQueries,
             debug: {
-                siteUrl: 'sc-domain:m51.no',
-                email: client_email
+                siteUrl: successUrl,
+                email: client_email,
+                rowCount: finalRows.length,
+                queryCount: topQueries.length
             }
         });
 

@@ -14,15 +14,14 @@ export async function GET() {
         console.log("Key present:", !!private_key);
 
         if (!client_email || !private_key) {
-            console.warn('Missing Google Credentials');
-            // Return empty data structure so frontend doesn't crash during setup
+            console.error('Missing Google Credentials: GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY is not set');
             return NextResponse.json({
-                clicks: 0,
-                impressions: 0,
-                ctr: 0,
-                position: 0,
-                topQueries: []
-            });
+                error: 'Mangler Google-konfigurasjon i Vercel (Environment Variables)',
+                debug: {
+                    email: client_email || 'Ikke satt',
+                    hasKey: !!private_key
+                }
+            }, { status: 500 });
         }
 
         const auth = new google.auth.GoogleAuth({
@@ -90,7 +89,7 @@ export async function GET() {
 
         // If no data found, fall back to the first available site or the domain default
         if (!successUrl) {
-            successUrl = matchedSite || propertyFormats[0];
+            successUrl = matchedSite || propertyFormats[0] || '';
         }
 
         const totalsResponse = await searchConsole.searchanalytics.query({

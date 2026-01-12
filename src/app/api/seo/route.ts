@@ -35,7 +35,12 @@ export async function GET() {
 
         const searchConsole = google.searchconsole({ version: 'v1', auth });
 
-        // Calculate date range (Last 28 days)
+        // Diagnostic: List all sites this service account can see
+        const siteListResponse = await searchConsole.sites.list();
+        const availableSites = (siteListResponse.data.siteEntry || []).map(s => s.siteUrl);
+        console.log("SEO API: Available sites:", availableSites);
+
+        // Calculate date range (Last 30 days)
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(endDate.getDate() - 30); // 30 days ago
@@ -43,16 +48,23 @@ export async function GET() {
         const formattedEndDate = endDate.toISOString().split('T')[0];
         const formattedStartDate = startDate.toISOString().split('T')[0];
 
+        // Property formats to try: User's domain, but also whatever is in the available sites
         const propertyFormats = [
             'sc-domain:m51.no',
             'https://m51.no/',
-            'https://www.m51.no/'
+            'https://www.m51.no/',
+            ...availableSites.filter(s => s && !s.includes('m51.no')) // Add others just in case
         ];
 
         let rows: any[] = [];
         let successUrl = '';
 
-        for (const url of propertyFormats) {
+        // Prioritize matching sites from the available list
+        const matchedSite = availableSites.find(s => s?.includes('m51.no'));
+        const formatsToTry = matchedSite ? [matchedSite, ...propertyFormats.filter(f => f !== matchedSite)] : propertyFormats;
+
+        for (const url of formatsToTry) {
+            if (!url) continue;
             try {
                 console.log(`SEO API: Trying property ${url}...`);
                 const res = await searchConsole.searchanalytics.query({
@@ -61,13 +73,14 @@ export async function GET() {
                         startDate: formattedStartDate,
                         endDate: formattedEndDate,
                         dimensions: ['date'],
-                        rowLimit: 10
+                        rowLimit: 5
                     }
                 });
-                if (res.data.rows && res.data.rows.length > 0) {
+                if (res.data.rows) {
                     rows = res.data.rows;
                     successUrl = url;
                     console.log(`SEO API: Success with ${url}`);
+                    // If we have data, we stop. If we have 0 rows but success (no error), it's a valid property but empty.
                     break;
                 }
             } catch (e: any) {
@@ -75,13 +88,12 @@ export async function GET() {
             }
         }
 
-        // If no data found with date dimension, just pick the first one and try queries anyway
+        // If no data found, fall back to the first available site or the domain default
         if (!successUrl) {
-            successUrl = propertyFormats[0];
-            console.warn("SEO API: No data found in any property format. Falling back to default.");
+            successUrl = matchedSite || propertyFormats[0];
         }
 
-        const totalsResponse = rows.length > 0 ? { data: { rows } } : await searchConsole.searchanalytics.query({
+        const totalsResponse = await searchConsole.searchanalytics.query({
             siteUrl: successUrl,
             requestBody: {
                 startDate: formattedStartDate,
@@ -107,7 +119,7 @@ export async function GET() {
         const avgPosition = totalImpressions > 0 ? weightedPosition / totalImpressions : 0;
         const avgCtr = totalImpressions > 0 ? weightedCtr / totalImpressions : 0;
 
-        // Fetch Top Queries using the successful URL
+        // Fetch Top Queries
         const queryResponse = await searchConsole.searchanalytics.query({
             siteUrl: successUrl,
             requestBody: {
@@ -134,8 +146,8 @@ export async function GET() {
             debug: {
                 siteUrl: successUrl,
                 email: client_email,
-                rowCount: finalRows.length,
-                queryCount: topQueries.length
+                availableSites,
+                rowCount: finalRows.length
             }
         });
 

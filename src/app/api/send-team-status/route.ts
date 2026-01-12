@@ -13,6 +13,9 @@ const MONTH_NAMES = [
 
 export async function GET(request: NextRequest) {
     try {
+        // Disabled by user request
+        return NextResponse.json({ message: 'Team status email is disabled' });
+
         const { searchParams } = new URL(request.url);
         const force = searchParams.get('force') === 'true';
         const targetEmail = searchParams.get('email');

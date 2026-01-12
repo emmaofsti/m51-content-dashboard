@@ -21,7 +21,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
         const info = await transporter.sendMail({
             from: `M51 Content Dashboard <${user}>`,
             to,
-            cc: 'emma@m51.no', // Always CC Emma
+            cc: to === 'emma@m51.no' ? undefined : 'emma@m51.no',
             subject,
             html,
         });

@@ -45,7 +45,7 @@ export async function GET() {
 
         // Fetch Totals
         const responseCallback = await searchConsole.searchanalytics.query({
-            siteUrl: 'https://m51.no/', // Updated to match user's GSC property
+            siteUrl: 'sc-domain:m51.no', // Domain property format
             requestBody: {
                 startDate: formattedStartDate,
                 endDate: formattedEndDate,
@@ -74,7 +74,7 @@ export async function GET() {
 
         // Fetch Top Queries
         const queryResponse = await searchConsole.searchanalytics.query({
-            siteUrl: 'https://m51.no/',
+            siteUrl: 'sc-domain:m51.no',
             requestBody: {
                 startDate: formattedStartDate,
                 endDate: formattedEndDate,

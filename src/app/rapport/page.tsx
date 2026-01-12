@@ -25,10 +25,13 @@ function HelpIcon({ text }: HelpIconProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <span className={styles.helpIconContainer}>
+        <span className={styles.helpIconContainer} onClick={(e) => e.stopPropagation()}>
             <span
                 className={styles.helpIcon}
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsOpen(!isOpen);
+                }}
                 style={{ cursor: 'pointer' }}
             >
                 ?

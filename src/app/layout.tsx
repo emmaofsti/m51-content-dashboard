@@ -4,8 +4,6 @@ import "./globals.css";
 import { Shell } from "../components/Shell";
 import { ContributionsProvider } from "../context/ContributionsContext";
 
-import { MouseGlow } from "../components/MouseGlow";
-
 const urbanist = Urbanist({
   subsets: ["latin"],
   variable: "--font-urbanist",

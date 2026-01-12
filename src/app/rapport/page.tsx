@@ -61,19 +61,6 @@ export default function RapportPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    useEffect(() => {
-        fetch('/api/seo')
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) console.warn("SEO API Warning:", data.error);
-                setData(data); // Even if empty, set it
-            })
-            .catch(err => {
-                console.error("Failed to load SEO data", err);
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
     return (
         <main className={styles.main}>
             <h1 className={styles.title}>SEO Rapport – Siste 30 dager</h1>
@@ -184,7 +171,6 @@ export default function RapportPage() {
                                         isLive: !!liveMatch // Flag to show if this is real data
                                     };
                                 })
-                                .filter(item => item.isLive)
                                 .sort((a, b) => {
                                     // Sort by position ascending
                                     if (a.position === null && b.position === null) return 0;

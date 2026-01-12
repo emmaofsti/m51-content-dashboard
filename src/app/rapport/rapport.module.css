@@ -29,6 +29,13 @@
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 }
 
+.activeCard {
+    background: rgba(189, 237, 98, 0.05);
+    /* Subtle lime glow */
+    border-color: rgba(189, 237, 98, 0.4) !important;
+    box-shadow: 0 0 20px rgba(189, 237, 98, 0.1);
+}
+
 /* Spotlight Effect Removed - moving to global background */
 
 .tableWrapper {

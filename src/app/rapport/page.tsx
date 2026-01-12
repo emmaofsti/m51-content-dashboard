@@ -50,6 +50,7 @@ export default function RapportPage() {
 
     const [lastUpdated, setLastUpdated] = useState<string>('');
     const [debugInfo, setDebugInfo] = useState<any>(null);
+    const [filter, setFilter] = useState<'clicks' | 'impressions' | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -149,24 +150,36 @@ export default function RapportPage() {
             {/* Overview Cards (From GSC API) */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
                 <div
-                    className={styles.card}
-                    style={{ textAlign: 'center', padding: '1.5rem' }}
+                    className={`${styles.card} ${filter === 'clicks' ? styles.activeCard : ''}`}
+                    style={{
+                        textAlign: 'center',
+                        padding: '1.5rem',
+                        cursor: 'pointer',
+                        borderColor: filter === 'clicks' ? '#BDED62' : 'rgba(255, 255, 255, 0.1)'
+                    }}
+                    onClick={() => setFilter(filter === 'clicks' ? null : 'clicks')}
                 >
                     <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                         Klikk (GSC)
-                        <HelpIcon text="Antall ganger noen har klikket på en lenke til din side fra Google-søk." />
+                        <HelpIcon text="Antall ganger noen har klikket på en lenke til din side fra Google-søk. Trykk for å se søkeordene." />
                     </div>
                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#BDED62' }}>
                         {data?.clicks ? data.clicks.toLocaleString() : '0'}
                     </div>
                 </div>
                 <div
-                    className={styles.card}
-                    style={{ textAlign: 'center', padding: '1.5rem' }}
+                    className={`${styles.card} ${filter === 'impressions' ? styles.activeCard : ''}`}
+                    style={{
+                        textAlign: 'center',
+                        padding: '1.5rem',
+                        cursor: 'pointer',
+                        borderColor: filter === 'impressions' ? '#fff' : 'rgba(255, 255, 255, 0.1)'
+                    }}
+                    onClick={() => setFilter(filter === 'impressions' ? null : 'impressions')}
                 >
                     <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                         Visninger (GSC)
-                        <HelpIcon text="Hvor mange ganger en lenke til din side har blitt vist i søkeresultatene." />
+                        <HelpIcon text="Hvor mange ganger en lenke til din side har blitt vist i søkeresultatene. Trykk for å se søkeordene." />
                     </div>
                     <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>
                         {data?.impressions ? data.impressions.toLocaleString() : '0'}
@@ -174,7 +187,7 @@ export default function RapportPage() {
                 </div>
                 <div
                     className={styles.card}
-                    style={{ textAlign: 'center', padding: '1.5rem' }}
+                    style={{ textAlign: 'center', padding: '1.5rem', opacity: 0.8 }}
                 >
                     <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                         Gj.snittlig CTR
@@ -186,7 +199,7 @@ export default function RapportPage() {
                 </div>
                 <div
                     className={styles.card}
-                    style={{ textAlign: 'center', padding: '1.5rem' }}
+                    style={{ textAlign: 'center', padding: '1.5rem', opacity: 0.8 }}
                 >
                     <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                         Gj.snittlig Posisjon
@@ -198,9 +211,29 @@ export default function RapportPage() {
                 </div>
             </div>
 
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
-                Søkeord (Rank Tracker)
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+                <h2 style={{ fontSize: '1.5rem', margin: 0 }}>
+                    {filter === 'clicks' && '🔥 Søkeord som ga klikk'}
+                    {filter === 'impressions' && '👀 Søkeord med flest visninger'}
+                    {filter === null && '🎯 Utvalgte søkeord (Tracker)'}
+                </h2>
+                {filter && (
+                    <button
+                        onClick={() => setFilter(null)}
+                        style={{
+                            background: 'none',
+                            color: '#ff3b3f',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            padding: '5px 10px',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(255, 59, 63, 0.2)'
+                        }}
+                    >
+                        Nullstill filter
+                    </button>
+                )}
+            </div>
 
             {/* Detailed Table (From Imported Manual Data) */}
             <div className={styles.card}>
@@ -223,79 +256,95 @@ export default function RapportPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {importedKeywords
-                                .map((item) => {
-                                    // Try to find this keyword in the live GSC data
-                                    const liveMatch = data?.topQueries?.find(q => q.query.toLowerCase() === item.keyword.toLowerCase());
-
-                                    // Use live position if available, otherwise fallback to manual
-                                    const effectivePosition = liveMatch ? liveMatch.position : item.position;
-
-                                    // Use live impressions if available, otherwise 0
-                                    const effectiveImpressions = liveMatch ? liveMatch.impressions : 0;
-
-                                    // Calculate change:
-                                    // If we have live data matching manual data, we can calculate Change = (ManualBaseline - Live).
-                                    // Example: Manual was 19, Live is 15. Change is +4 (Improved).
-                                    // If no live data, use the manual Change column.
-                                    let effectiveChange = item.change;
-                                    if (liveMatch && item.position) {
-                                        effectiveChange = item.position - liveMatch.position;
-                                    }
-
-                                    return {
-                                        ...item,
-                                        position: effectivePosition,
-                                        change: effectiveChange,
-                                        impressions: effectiveImpressions,
-                                        isLive: !!liveMatch // Flag to show if this is real data
-                                    };
-                                })
-                                .sort((a, b) => {
-                                    // Sort by position ascending
-                                    if (a.position === null && b.position === null) return 0;
-                                    if (a.position === null) return 1;
-                                    if (b.position === null) return -1;
-                                    return a.position - b.position;
-                                })
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td className={styles.td} style={{ fontWeight: 500 }}>
-                                            {item.url ? (
-                                                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
-                                                    {item.keyword}
-                                                </a>
-                                            ) : (
-                                                item.keyword
-                                            )}
-                                        </td>
-                                        <td className={styles.td} style={{ color: '#aaa' }}>
-                                            {item.isLive ? item.impressions.toLocaleString() : '–'}
-                                        </td>
-                                        <td className={styles.td}>
-                                            {item.position ? (
-                                                <span style={{
-                                                    color: item.position <= 10 ? '#bded62' : '#fff',
-                                                    fontWeight: item.position <= 10 ? 'bold' : 'normal'
-                                                }}>
+                            {filter ? (
+                                // Render Live GSC Data when filtering
+                                (data?.topQueries || [])
+                                    .filter(q => filter === 'clicks' ? q.clicks > 0 : q.impressions > 0)
+                                    .sort((a, b) => filter === 'clicks' ? b.clicks - a.clicks : b.impressions - a.impressions)
+                                    .slice(0, 50) // Limit to top 50
+                                    .map((item, index) => (
+                                        <tr key={index}>
+                                            <td className={styles.td} style={{ fontWeight: 500 }}>
+                                                {item.query}
+                                            </td>
+                                            <td className={styles.td} style={{ color: '#aaa' }}>
+                                                {filter === 'clicks' ? item.clicks.toLocaleString() : item.impressions.toLocaleString()}
+                                            </td>
+                                            <td className={styles.td}>
+                                                <span style={{ color: item.position <= 10 ? '#bded62' : '#fff' }}>
                                                     #{Math.round(item.position)}
                                                 </span>
-                                            ) : (
-                                                <span style={{ color: '#555' }}>–</span>
-                                            )}
-                                        </td>
-                                        <td className={styles.td}>
-                                            {Math.round(item.change) !== 0 && (
-                                                <span style={{
-                                                    color: item.change > 0 ? '#bded62' : '#ff3b3f',
-                                                    fontSize: '0.9em'
-                                                }}>
-                                                    {item.change > 0 ? '▲' : '▼'} {Math.round(Math.abs(item.change))}
-                                                </span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
+                                            </td>
+                                            <td className={styles.td} style={{ color: '#555' }}>
+                                                –
+                                            </td>
+                                        </tr>
+                                    ))
+                            ) : (
+                                // Render Tracked Keywords (Default)
+                                importedKeywords
+                                    .map((item) => {
+                                        const liveMatch = data?.topQueries?.find(q => q.query.toLowerCase() === item.keyword.toLowerCase());
+                                        const effectivePosition = liveMatch ? liveMatch.position : item.position;
+                                        const effectiveImpressions = liveMatch ? liveMatch.impressions : 0;
+                                        let effectiveChange = item.change;
+                                        if (liveMatch && item.position) {
+                                            effectiveChange = item.position - liveMatch.position;
+                                        }
+
+                                        return {
+                                            ...item,
+                                            position: effectivePosition,
+                                            change: effectiveChange,
+                                            impressions: effectiveImpressions,
+                                            isLive: !!liveMatch
+                                        };
+                                    })
+                                    .sort((a, b) => {
+                                        if (a.position === null && b.position === null) return 0;
+                                        if (a.position === null) return 1;
+                                        if (b.position === null) return -1;
+                                        return a.position - b.position;
+                                    })
+                                    .map((item, index) => (
+                                        <tr key={index}>
+                                            <td className={styles.td} style={{ fontWeight: 500 }}>
+                                                {item.url ? (
+                                                    <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                                                        {item.keyword}
+                                                    </a>
+                                                ) : (
+                                                    item.keyword
+                                                )}
+                                            </td>
+                                            <td className={styles.td} style={{ color: '#aaa' }}>
+                                                {item.isLive ? item.impressions.toLocaleString() : '–'}
+                                            </td>
+                                            <td className={styles.td}>
+                                                {item.position ? (
+                                                    <span style={{
+                                                        color: item.position <= 10 ? '#bded62' : '#fff',
+                                                        fontWeight: item.position <= 10 ? 'bold' : 'normal'
+                                                    }}>
+                                                        #{Math.round(item.position)}
+                                                    </span>
+                                                ) : (
+                                                    <span style={{ color: '#555' }}>–</span>
+                                                )}
+                                            </td>
+                                            <td className={styles.td}>
+                                                {Math.round(item.change) !== 0 && (
+                                                    <span style={{
+                                                        color: item.change > 0 ? '#bded62' : '#ff3b3f',
+                                                        fontSize: '0.9em'
+                                                    }}>
+                                                        {item.change > 0 ? '▲' : '▼'} {Math.round(Math.abs(item.change))}
+                                                    </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                            )}
                         </tbody>
                     </table>
                 </div>

@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-export const sendEmail = async (to: string, subject: string, html: string) => {
+export const sendEmail = async (to: string, subject: string, html: string, options?: { noCc?: boolean }) => {
     const user = process.env.EMAIL_USER;
     const pass = process.env.EMAIL_PASSWORD;
 
@@ -18,10 +18,12 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
             },
         });
 
+        const shouldCc = !options?.noCc && to !== 'emma@m51.no';
+
         const info = await transporter.sendMail({
             from: `M51 Content Dashboard <${user}>`,
             to,
-            cc: to === 'emma@m51.no' ? undefined : 'emma@m51.no',
+            cc: shouldCc ? 'emma@m51.no' : undefined,
             subject,
             html,
         });

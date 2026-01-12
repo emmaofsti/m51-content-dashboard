@@ -100,6 +100,45 @@ export default function RapportPage() {
                 </div>
             )}
 
+            {/* Debug/Status info when data is missing but no explicit error */}
+            {!error && (!data || data.impressions === 0) && !loading && (
+                <div style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    padding: '1.5rem',
+                    borderRadius: '12px',
+                    marginBottom: '2rem',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    fontSize: '0.9rem'
+                }}>
+                    <h3 style={{ color: '#fff', marginTop: 0, marginBottom: '0.5rem', fontSize: '1rem' }}>📡 Tilkoblingsstatus</h3>
+                    <p style={{ margin: '0.2rem 0' }}>✓ Koblet til Google Search Console</p>
+                    <p style={{ margin: '0.2rem 0' }}>✓ Bruker e-post: <code>{debugInfo?.email}</code></p>
+                    <p style={{ margin: '0.2rem 0' }}>✓ Spør etter data for: <strong>{debugInfo?.siteUrl}</strong></p>
+
+                    {debugInfo?.availableSites && debugInfo.availableSites.length > 0 ? (
+                        <div style={{ marginTop: '1rem' }}>
+                            <p style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Andre tilgjengelige eiendommer på denne kontoen:</p>
+                            <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                                {debugInfo.availableSites.map((site: string) => (
+                                    <li key={site} style={{ opacity: site === debugInfo.siteUrl ? 1 : 0.6 }}>
+                                        {site} {site === debugInfo.siteUrl && '(Aktiv)'}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : (
+                        <p style={{ color: '#ffbaba', marginTop: '1rem' }}>
+                            ⚠️ Denne kontoen har ikke tilgang til noen eiendommer i Search Console enda.
+                            Legg til e-posten over i Search Console under "Brukere og tillatelser".
+                        </p>
+                    )}
+
+                    <p style={{ marginTop: '1rem', fontStyle: 'italic', opacity: 0.7 }}>
+                        Merk: Hvis du nettopp har lagt til siden, kan det ta 24-48 timer før Google viser data i API-et.
+                    </p>
+                </div>
+            )}
+
             {/* Overview Cards (From GSC API) */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
                 <div

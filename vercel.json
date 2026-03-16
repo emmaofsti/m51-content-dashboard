@@ -1,12 +1,3 @@
 {
-    "crons": [
-        {
-            "path": "/api/send-reminder?force=true",
-            "schedule": "0 10 * * 0"
-        },
-        {
-            "path": "/api/send-team-status?force=true",
-            "schedule": "0 10 * * 0"
-        }
-    ]
+    "crons": []
 }
